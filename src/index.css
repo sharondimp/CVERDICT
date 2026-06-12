@@ -1,0 +1,44 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #E8E8E8;
+  font-family: 'Inter', sans-serif;
+  color: #1A1A1A;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes stampIn {
+  0% { transform: rotate(-8deg) scale(2); opacity: 0; }
+  100% { transform: rotate(-8deg) scale(1); opacity: 1; }
+}
+
+@keyframes fadeUp {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.stamp {
+  animation: stampIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.fade-up {
+  animation: fadeUp 0.5s ease forwards;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #1A1A1A !important;
+}
+
+button:active {
+  opacity: 0.85;
+}
