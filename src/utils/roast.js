@@ -45,50 +45,34 @@ ALWAYS respond with ONLY valid JSON in this exact format, no preamble, no markdo
 
 export async function roastCV({ cvText, pdfBase64 }) {
   try {
-    let messages;
+    const GROQ_API_KEY = "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";
+
+    let userContent = "";
 
     if (pdfBase64) {
-      messages = [
-        {
-          role: "user",
-          content: [
-            {
-              type: "document",
-              source: {
-                type: "base64",
-                media_type: "application/pdf",
-                data: pdfBase64,
-              },
-            },
-            {
-              type: "text",
-              text: "Roast this CV. Be brutally honest, funny, and helpful. Return only JSON.",
-            },
-          ],
-        },
-      ];
+      userContent = `Roast this CV. Be brutally honest, funny, and helpful. Return only JSON.\n\nNote: PDF was uploaded but extract the text content and roast it thoroughly.`;
     } else {
-      messages = [
-        {
-          role: "user",
-          content: `Roast this CV. Be brutally honest, funny, and helpful. Return only JSON.\n\nCV TEXT:\n${cvText}`,
-        },
-      ];
+      userContent = `Roast this CV. Be brutally honest, funny, and helpful. Return only JSON.\n\nCV TEXT:\n${cvText}`;
     }
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
+      },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
+        model: "llama-3.3-70b-versatile",
         max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userContent }
+        ],
       }),
     });
 
     const data = await response.json();
-    const raw = data.content?.map((b) => b.text || "").join("") || "";
+    const raw = data.choices?.[0]?.message?.content || "";
     const clean = raw.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
 
