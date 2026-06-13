@@ -47,13 +47,9 @@ export async function roastCV({ cvText, pdfBase64 }) {
   try {
     const GROQ_API_KEY = "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";
 
-    let userContent = "";
-
-    if (pdfBase64) {
-      userContent = `Roast this CV. Be brutally honest, funny, and helpful. Return only JSON.\n\nNote: PDF was uploaded but extract the text content and roast it thoroughly.`;
-    } else {
-      userContent = `Roast this CV. Be brutally honest, funny, and helpful. Return only JSON.\n\nCV TEXT:\n${cvText}`;
-    }
+    const userContent = pdfBase64
+      ? `Roast this CV thoroughly. Return only JSON.\n\nThe user uploaded a PDF. Here is all the text content from it — roast it:\n${cvText}`
+      : `Roast this CV. Be brutally honest, funny, and helpful. Return only JSON.\n\nCV TEXT:\n${cvText}`;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -71,14 +67,20 @@ export async function roastCV({ cvText, pdfBase64 }) {
       }),
     });
 
+    if (!response.ok) {
+      const errData = await response.json();
+      const errMsg = errData?.error?.message || `HTTP ${response.status}`;
+      return { data: null, error: `Groq API error: ${errMsg}` };
+    }
+
     const data = await response.json();
+    console.log("Groq response:", JSON.stringify(data));
     const raw = data.choices?.[0]?.message?.content || "";
     const clean = raw.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
 
     return { data: parsed, error: null };
   } catch (err) {
-    console.error("Roast error:", err);
-    return { data: null, error: "Something went wrong. Please try again." };
+    return { data: null, error: `Failed: ${err.message}` };
   }
 }
