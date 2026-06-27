@@ -45,7 +45,7 @@ ALWAYS respond with ONLY valid JSON in this exact format, no preamble, no markdo
 
 export async function roastCV({ cvText, pdfBase64 }) {
   try {
-    const GROQ_API_KEY = "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";
+    const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
     const userContent = pdfBase64
       ? `Roast this CV thoroughly. Return only JSON.\n\nThe user uploaded a PDF. Here is all the text content from it — roast it:\n${cvText}`
@@ -83,4 +83,4 @@ export async function roastCV({ cvText, pdfBase64 }) {
   } catch (err) {
     return { data: null, error: `Failed: ${err.message}` };
   }
-}
+      }
